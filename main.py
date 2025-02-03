@@ -1,23 +1,28 @@
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
+from services import scrape_latest_updates
+from services import analyze_with_gpt4
 
-load_dotenv()
 
-openai_client = OpenAI(
-            api_key=os.getenv('OPENAI_API_KEY'),
-            )
+def main():
+    print("Scraping IRAS Latest Updates...\n")
+    recent_updates = scrape_latest_updates("01 Jan 2025")
 
-def create_gpt_responses(prompt):
-    response = openai_client.chat.completions.create(
-        model='gpt-4o',
-        messages=[
-            {"role": "system", "content": 'You are a helpful agent'},
-            {"role": "user", "content": prompt}]
-    )
-    response_content = response.choices[0].message.content
-    return response_content
+    if not recent_updates:
+        print("No updates were found. Please check the CSS selectors or the page structure.")
+        return
 
+    # Display the scraped data for debugging purposes
+    print("Scraped Data:")
+    for update in recent_updates:
+        print(f"Title: {update['title']}")
+        print(f"Date: {update['date']}")
+        print(f"Link: {update['link']}\n")
+
+    print("Sending data to GPT‑4o for analysis...\n")
+    analysis = analyze_with_gpt4(recent_updates)
+
+    print("GPT‑4o Analysis:\n")
+    print(analysis)
 
 if __name__ == "__main__":
-    print(create_gpt_responses("Say something funny"))
+    main()
+
