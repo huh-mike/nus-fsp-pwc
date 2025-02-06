@@ -16,3 +16,4 @@ db = client[db_name]
 # Print connection status
 print("Connected to MongoDB:", db.name)
 
+
