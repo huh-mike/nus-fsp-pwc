@@ -1,7 +1,5 @@
-from services import scrape_latest_updates
-from services import analyze_with_gpt4
 
-
+'''
 def main():
     print("Scraping IRAS Latest Updates...\n")
     recent_updates = scrape_latest_updates("01 Jan 2025")
@@ -22,7 +20,9 @@ def main():
 
     print("GPT‑4o Analysis:\n")
     print(analysis)
+'''
+
 
 if __name__ == "__main__":
-    main()
+    pass
 
