@@ -22,7 +22,6 @@ def main():
 
     print("GPT‑4o Analysis:\n")
     print(analysis)
-    print("test")
 
 if __name__ == "__main__":
     main()
