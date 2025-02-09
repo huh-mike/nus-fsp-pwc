@@ -1,7 +1,8 @@
 import os
-import time
 from openai import OpenAI
+import dotenv
 
+dotenv.load_dotenv()
 
 try:
     openai_client = OpenAI(
