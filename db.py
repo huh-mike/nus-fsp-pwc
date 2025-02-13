@@ -33,7 +33,7 @@ def upload_to_mongo(data, db_name, collection_name,
 
 
 if __name__ == "__main__":
-    # Example tagged data
+    #
     tagged_data = [
         {"id": 1, "text": "This is a sample sentence.", "tags": ["sample", "sentence"]},
         {"id": 2, "text": "Another example with tags.", "tags": ["example", "tags"]}
