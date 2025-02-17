@@ -90,13 +90,15 @@ async def crawl_4_ai_contents_paragraph_break(url: str) -> dict:
     Exclude any navigation menus, advertisements, or unrelated footer content.
     """
 
+    llm_strategy = LLMExtractionStrategy(
+        provider="openai/gpt-4o-mini",  # LLM provider
+        api_token=os.getenv("OPENAI_API_KEY"),
+        extraction_type="text",
+        instruction=extraction_instruction,
+    )
+
     run_config = CrawlerRunConfig(
-        extraction_strategy=LLMExtractionStrategy(
-            provider="openai/gpt-4o-mini",  # LLM provider
-            api_token=os.getenv("OPENAI_API_KEY"),
-            extraction_type="text",
-            instruction=extraction_instruction,
-        ),
+        extraction_strategy=llm_strategy,
         cache_mode=CacheMode.BYPASS, # This allows crawler to always fetch fresh data.
     )
     async with AsyncWebCrawler(config=browser_config) as crawler:
@@ -104,24 +106,20 @@ async def crawl_4_ai_contents_paragraph_break(url: str) -> dict:
             url=url,
             config=run_config
         )
-        text_content = result.markdown.strip()
-        print("Extracted Content:")
-        print(result.extracted_content)
-
-        output = {
-            "url": url,
-            "text": text_content
-        }
+        output = result.extracted_content
+        llm_strategy.show_usage()
 
         return output
 
-
+# For testing the module
 if __name__ == "__main__":
     urls_dict = {}
+
+    # 5 means to crawl 5 pages (of URLs)
     for i in range(5):
         urls_dict.update(get_urls_in_iras_updates(i+1))
 
+    # This chunk only crawls the latest one URL.
     first_key = next(iter(urls_dict))
     print(f"Now Crawling: {urls_dict[first_key]}")
-
-    asyncio.run(crawl_4_ai_contents_paragraph_break(urls_dict[first_key]))
+    print(asyncio.run(crawl_4_ai_contents_paragraph_break(urls_dict[first_key])))
