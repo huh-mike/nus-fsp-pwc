@@ -3,6 +3,9 @@ selenium
 openai
 crawl4ai
 
-# Supplements
+# Dev Supplements
 pip
 python-dotenv
+
+# Database
+pymongo
