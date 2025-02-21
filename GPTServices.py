@@ -1,4 +1,5 @@
 import os
+import json
 from openai import OpenAI
 import dotenv
 
@@ -30,6 +31,22 @@ def gpt_generate_single_response(user_prompt:str, system_prompt:str, model:str="
     except Exception as e:
         print(f"[OPENAI] ERROR:Unable to generate GPT responses! ({e})")
         raise
+
+
+def gpt_generate_embedding(text: str, model: str = "text-embedding-3-small"):
+    try:
+        response = openai_client.embeddings.create(
+            model=model,
+            input=text,
+        )
+        print(f"[OPENAI] Successfully generated embedding: {response}")
+        return response.data[0].embedding
+    except Exception as e:
+        print(f"[OPENAI] ERROR:Unable to generate embeddings! ({e})")
+    
+    
+    
+    
 
 def gpt_stream_responses(conversation, update_callback, finished_callback):
     try:
@@ -88,8 +105,7 @@ def finished_callback(full_response):
     print(full_response)
 
 
-if __name__ == "__main__":
-
+def test_main():
     print("Chat Streaming Test. Type 'exit' to stop.")
 
     conversation = [{"role": "system", "content": "You are a helpful assistant."}]
@@ -104,3 +120,7 @@ if __name__ == "__main__":
 
         print("\nAssistant:", end=" ", flush=True)
         gpt_stream_responses(conversation, update_callback, finished_callback)
+
+
+if __name__ == "__main__":
+    pass

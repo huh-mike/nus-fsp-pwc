@@ -68,21 +68,42 @@ async def crawl_4_ai_contents_paragraph_break(url):
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
         result = await crawler.arun(url=url, config=run_config)
+        llm_strategy.show_usage()
         return {"url": url, "text": result.extracted_content}
 
 
-def main():
-    urls_dict = get_urls_in_iras_updates(1)  # Crawl the first page of updates
+def get_datascraped_depth(depth):
+
+    urls_dict = {}
+    for i in range(depth):
+        urls_dict.update(get_urls_in_iras_updates(i))
+
     scraped_data = []
 
     for title, url in urls_dict.items():
         print(f"Crawling: {url}")
         content = asyncio.run(crawl_4_ai_contents_paragraph_break(url))
+
+        if isinstance(content["text"], str):
+            try:
+                content["text"] = json.loads(content["text"])  # Convert JSON string to list
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON: {e}")
+                content["text"] = []  # Default to an empty list if parsing fails
+
+        # Dummy Tags: will replace later
         scraped_data.append({"title": title, "url": url, "text": content["text"], "tags": ["IRAS", "tax update"]})
 
-    upload_to_mongo(scraped_data, "TaggedDatabase", "TaggedCollection")
-    print("Data uploaded successfully.")
+    # Here is to parse the string list format into actual list format.
+    for item in scraped_data:
+        combined_content = " ".join(
+            " ".join(section["content"]) for section in item["text"]
+        )
+        item["text"] = combined_content  # Replace "text" with the joined string
 
+    # Print the modified JSON
+    print(json.dumps(scraped_data, indent=4))
+    return scraped_data
 
-if __name__ == "__main__":
-    main()
+    # upload_to_mongo(scraped_data, "TaggedDatabase", "TaggedCollection")
+    # print("Data uploaded successfully.")

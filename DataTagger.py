@@ -1,37 +1,44 @@
-def add_tags_to_dataset(dataset, tags_list=None):
-    """
-    Add tags to dataset entries in JSON format
+import pandas as pd
+import numpy as np
+import ast
 
-    Args:
-        dataset: Input dataset in JSON format
-        tags_list: List of tags to be added (optional)
+from GPTServices import gpt_generate_embedding
+from sklearn.metrics.pairwise import cosine_similarity
 
-    Returns:
-        tagged_dataset: Dataset with added tags
-    """
-    if not isinstance(dataset, dict):
-        raise ValueError("Input dataset must be a dictionary")
+def create_embeddings_and_get_relevant_tags(raw_dataset):
+    df = pd.read_csv("tag_data_with_embeddings.csv")
+    valid_tags = set(df["tag"])
 
-    tagged_dataset = dataset.copy()
+    def generate_best_tags(top_n, article):
+        article_embedding = gpt_generate_embedding(article)
+        similarities = {
+            tag: cosine_similarity([article_embedding], [tag_embedding])[0][0]
+            for tag, tag_embedding in tag_embeddings.items()
+        }
+        sorted_tags = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
+        best_tags = [(tag, score) for tag, score in sorted_tags[:top_n] if tag in valid_tags]
+        return best_tags
 
-    # If no tags provided, you can implement your tagging logic here
-    if tags_list is None:
-        # Placeholder for your custom tagging logic
-        # Example: tags_list = generate_tags(dataset)
-        tags_list = []
+    if "embedding" not in df.columns or df["embedding"].isna().any():
 
-    # Add tags to the dataset
-    tagged_dataset['tags'] = tags_list
+        df["embedding"] = df["tag"].apply(gpt_generate_embedding)
+        df["embedding"] = df["embedding"].apply(lambda x: str(x))
+
+        df.to_csv("tag_data_with_embeddings.csv", index=False)
+        print("embeddings saved to csv!")
+
+    df["embedding"] = df["embedding"].apply(ast.literal_eval)
+
+    tag_embeddings = {row["tag"]: list(map(float, row["embedding"])) for _, row in df.iterrows()}
+
+    tagged_dataset = raw_dataset
+
+    for item in tagged_dataset:
+        text_content = item["text"]
+        new_tags = [tag for tag, _ in generate_best_tags(5,text_content)]
+        item["tags"] = new_tags
 
     return tagged_dataset
 
 
-if __name__ == "__main__":
-    # Example usage with predefined tags
-    data = {"article_name": "Name1", "content": "Some content"}
-    tags = ["technology", "programming", "python"]
-    tagged_data = add_tags_to_dataset(data, tags)
 
-    # Example usage with automatic tagging
-    data = {"article_name": "Name1", "content": "Some content"}
-    tagged_data = add_tags_to_dataset(data)

@@ -1,28 +1,16 @@
-
-'''
-def main():
-    print("Scraping IRAS Latest Updates...\n")
-    recent_updates = scrape_latest_updates("01 Jan 2025")
-
-    if not recent_updates:
-        print("No updates were found. Please check the CSS selectors or the page structure.")
-        return
-
-    # Display the scraped data for debugging purposes
-    print("Scraped Data:")
-    for update in recent_updates:
-        print(f"Title: {update['title']}")
-        print(f"Date: {update['date']}")
-        print(f"Link: {update['link']}\n")
-
-    print("Sending data to GPT‑4o for analysis...\n")
-    analysis = analyze_with_gpt4(recent_updates)
-
-    print("GPT‑4o Analysis:\n")
-    print(analysis)
-'''
-
-
+from ChatBotGUI import run_chatbotgui
+from DataScraper import get_datascraped_depth
+from DataTagger import create_embeddings_and_get_relevant_tags
+from db import upload_to_mongo
 if __name__ == "__main__":
-    pass
+    # Scrape Data from the first x pages:
+    raw_article_dataset = get_datascraped_depth(1)
 
+    # Tag each of the Data entries using vector similarity
+    tagged_article_dataset = create_embeddings_and_get_relevant_tags(raw_article_dataset)
+
+
+    upload_to_mongo(tagged_article_dataset)
+
+    print(tagged_article_dataset)
+    run_chatbotgui()

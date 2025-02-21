@@ -3,6 +3,11 @@ selenium
 openai
 crawl4ai
 
+pandas
+openpyxl
+networkx
+scikit-learn
+
 # Dev Supplements
 pip
 python-dotenv
