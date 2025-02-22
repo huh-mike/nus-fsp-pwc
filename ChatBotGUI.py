@@ -31,3 +31,16 @@ def run_chatbotgui():
         print("\nAssistant:", end=" ", flush=True)
         gpt_stream_responses(conversation, update_callback, finished_callback)
 
+'''
+1. 爬蟲軟件會從iras爬最新的文章
+2. 有一個tagger会把每一个最新的文章赋予tag (classification) => 新的數據庫
+- tagger to reconstruct with the following steps:
+    - pre-process the crawled data with GPT4o (to-do: generate an universal prompt to get accurate summaries)
+    - give summaries to text embedding model to generate better embeddings.
+    - use vector similarity to match best k-tags
+    - use gpt-4o-mini to validate the k-tags against the original summary.
+    - lastly, add tags in dictionary.
+3. 有一个chatbot會根據新的數據庫作為context來回答tax 相關問題
+
+frameworks to consider: llamaindex, langchain.
+'''

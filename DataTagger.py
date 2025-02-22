@@ -1,3 +1,5 @@
+from traceback import print_tb
+
 import pandas as pd
 import numpy as np
 import ast
@@ -39,6 +41,13 @@ def create_embeddings_and_get_relevant_tags(raw_dataset):
         item["tags"] = new_tags
 
     return tagged_dataset
+
+def main():
+    print("something")
+
+
+if __name__ == "__main__":
+    main()
 
 
 
