@@ -12,6 +12,7 @@ def create_embeddings_and_get_relevant_tags(raw_dataset):
     valid_tags = set(df["tag"])
 
     def generate_best_tags(top_n, article):
+        # top_n is the top number of tags
         article_embedding = gpt_generate_embedding(article)
         similarities = {
             tag: cosine_similarity([article_embedding], [tag_embedding])[0][0]
