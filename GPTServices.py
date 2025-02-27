@@ -4,7 +4,7 @@ from openai import OpenAI
 import dotenv
 
 dotenv.load_dotenv()
-
+print("hello")
 try:
     openai_client = OpenAI(
         api_key=os.getenv('OPENAI_API_KEY'),
