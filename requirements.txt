@@ -8,6 +8,9 @@ openpyxl
 networkx
 scikit-learn
 
+pdfminer.six
+PyMuPDF
+
 # Dev Supplements
 pip
 python-dotenv

@@ -18,7 +18,7 @@ def run_chatbotgui():
     print("Chat Streaming Test. Type 'exit' to stop.")
 
     # Initialise Conversation
-    conversation = [{"role": "system", "content": "You are a helpful assistant."}]
+    conversation = []
 
     while True:
         user_input = input("\nYou: ")
@@ -26,6 +26,11 @@ def run_chatbotgui():
             print("Exiting chat test.")
             break
 
+        # user_input -> gpt-text-embedding model to generate a embedding
+        # for that embedding, find vector simiarlity in the database and fetch the actual contents as a part of system input.
+        system_rag_context = None #result from above
+
+        conversation.append({"role": "system", "content": f"Your reference for this question: {system_rag_context}"})
         conversation.append({"role": "user", "content": user_input})
 
         print("\nAssistant:", end=" ", flush=True)
