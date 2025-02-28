@@ -1,4 +1,4 @@
-from GPTServices import gpt_stream_responses, gpt_generate_embedding
+from GPTServices import gpt_stream_responses, gpt_generate_embedding, ChatHistory
 from DataBasePipline import fetch_relevant_documents
 import dotenv
 
@@ -19,6 +19,7 @@ def run_chatbotgui():
     print("Chat Streaming Test. Type 'exit' to stop.")
 
     # Initialise Conversation
+    chat_history = ChatHistory()
     conversation = []
 
     while True:
@@ -28,14 +29,16 @@ def run_chatbotgui():
             break
 
         user_embedding = gpt_generate_embedding(user_input)
+        print(f"Your Question's embedding is generated: {user_embedding}")
 
-        system_rag_context = fetch_relevant_documents(user_embedding)
+        # system_rag_context = fetch_relevant_documents(user_embedding)
+        # print(f"Your reference for this question: {system_rag_context}")
 
-        conversation.append({"role": "system", "content": f"Your reference for this question: {system_rag_context}"})
+        conversation.append({"role": "system", "content": "Your reference for this question: {system_rag_context}"})
         conversation.append({"role": "user", "content": user_input})
 
         print("\nAssistant:", end=" ", flush=True)
-        gpt_stream_responses(conversation, update_callback, finished_callback)
+        gpt_stream_responses(conversation, update_callback, finished_callback,chat_history)
 
         # user_input -> gpt-text-embedding model to generate a embedding
         # for that embedding, find vector simiarlity in the database and fetch the actual contents as a part of system input.

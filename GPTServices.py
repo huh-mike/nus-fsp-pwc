@@ -37,12 +37,13 @@ def gpt_generate_embedding(text: str, model: str = "text-embedding-3-large"):
     return response.data[0].embedding
     
 
-def gpt_stream_responses(conversation, update_callback, finished_callback):
+def gpt_stream_responses(conversation, update_callback, finished_callback, chat_history):
     try:
+        chat_history.add_user_message(conversation[-1]["content"])
         # Create a chat completion with streaming enabled.
         response = openai_client.chat.completions.create(
             model="gpt-4o",
-            messages=conversation,
+            messages=chat_history.get_conversation(),
             stream=True
         )
         full_response = ""
@@ -57,6 +58,7 @@ def gpt_stream_responses(conversation, update_callback, finished_callback):
                 update_callback(content)
             # When complete, pass the full response to the finished callback.
         finished_callback(full_response)
+        chat_history.add_chatbot_message(full_response)
     except Exception as e:
         error_message = f"\n[Error: {str(e)}]"
         update_callback(error_message)
@@ -75,7 +77,7 @@ class ChatHistory:
 
     def add_chatbot_message(self, message):
         """Add the chatbot's response to the conversation history."""
-        self.history.append({"role": "chatbot", "content": message})
+        self.history.append({"role": "assistant", "content": message})
 
     def get_conversation(self):
         """Return the entire conversation history."""
@@ -90,26 +92,5 @@ def update_callback(content):
 
 def finished_callback(full_response):
     """Print the full response after streaming is complete."""
-    print("\n\n[COMPLETE] Full Response:")
-    print(full_response)
-
-
-def test_main():
-    print("Chat Streaming Test. Type 'exit' to stop.")
-
-    conversation = [{"role": "system", "content": "You are a helpful assistant."}]
-
-    while True:
-        user_input = input("\nYou: ")
-        if user_input.lower() == "exit":
-            print("Exiting chat test.")
-            break
-
-        conversation.append({"role": "user", "content": user_input})
-
-        print("\nAssistant:", end=" ", flush=True)
-        gpt_stream_responses(conversation, update_callback, finished_callback)
-
-
-if __name__ == "__main__":
     pass
+

@@ -20,8 +20,6 @@ from pymongo import MongoClient
 
 dotenv.load_dotenv()
 
-dotenv.load_dotenv()
-
 
 def get_urls_in_iras_updates(depth):
     chrome_options = Options()
@@ -187,11 +185,13 @@ def create_embeddings_and_get_relevant_tags(raw_dataset):
         print(f"Error in create_embeddings_and_get_relevant_tags: {e}")
         return raw_dataset  # Return original dataset in case of error
 
-mongo_client = MongoClient(os.getenv("MONGO_URI"))
-db = mongo_client["TaggedDatabase"]
-collection = db["TaggedCollection"]
+
 
 def fetch_relevant_documents(user_embedding, top_n=1):
+    MONGO_URI = os.getenv("MONGO_URI")
+    mongo_client = MongoClient(os.getenv("MONGO_URI"),tls=True, tlsAllowInvalidCertificates=True)
+    db = mongo_client["FSPDatabase"]
+    collection = db["TaggedCollection"]
 
     try:
         # Retrieve all documents from the collection
