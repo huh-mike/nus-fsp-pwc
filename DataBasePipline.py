@@ -15,6 +15,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 from db import upload_to_mongo
 from GPTServices import gpt_generate_embedding, gpt_generate_single_response
 import numpy as np
+from pymongo import MongoClient
+
+
+dotenv.load_dotenv()
 
 dotenv.load_dotenv()
 
@@ -183,6 +187,39 @@ def create_embeddings_and_get_relevant_tags(raw_dataset):
         print(f"Error in create_embeddings_and_get_relevant_tags: {e}")
         return raw_dataset  # Return original dataset in case of error
 
+mongo_client = MongoClient(os.getenv("MONGO_URI"))
+db = mongo_client["TaggedDatabase"]
+collection = db["TaggedCollection"]
+
+def fetch_relevant_documents(user_embedding, top_n=1):
+
+    try:
+        # Retrieve all documents from the collection
+        documents = list(collection.find({}, {"text": 1, "embedding": 1}))
+
+        if not documents:
+            return "No relevant documents found."
+
+        # Extract embeddings and texts
+        embeddings = np.array([doc["embedding"] for doc in documents])
+        texts = [doc["text"] for doc in documents]
+
+        # Compute cosine similarity
+        user_embedding = np.array(user_embedding).reshape(1, -1)
+        similarities = cosine_similarity(user_embedding, embeddings)[0]
+
+        # Get top N most similar documents
+        top_indices = similarities.argsort()[-top_n:][::-1]
+
+        # Return the most relevant document
+        best_match = texts[top_indices[0]]
+        return best_match
+
+    except Exception as e:
+        print(f"Error fetching relevant documents: {e}")
+        return "Error retrieving reference materials."
 
 if __name__ == "__main__":
     scrape_and_tag_data(depth=1)
+
+

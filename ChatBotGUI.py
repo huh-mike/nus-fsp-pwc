@@ -1,5 +1,8 @@
-from GPTServices import gpt_stream_responses
+from GPTServices import gpt_stream_responses, gpt_generate_embedding
+from DataBasePipline import fetch_relevant_documents
+import dotenv
 
+dotenv.load_dotenv()
 # Internal
 
 def update_callback(content):
@@ -9,8 +12,6 @@ def update_callback(content):
 def finished_callback(full_response):
     print("\n\n[COMPLETE] Full Response:")
     print(full_response)
-
-    # To update for response validation
 
 # External
 
@@ -26,15 +27,20 @@ def run_chatbotgui():
             print("Exiting chat test.")
             break
 
-        # user_input -> gpt-text-embedding model to generate a embedding
-        # for that embedding, find vector simiarlity in the database and fetch the actual contents as a part of system input.
-        system_rag_context = None #result from above
+        user_embedding = gpt_generate_embedding(user_input)
+
+        system_rag_context = fetch_relevant_documents(user_embedding)
 
         conversation.append({"role": "system", "content": f"Your reference for this question: {system_rag_context}"})
         conversation.append({"role": "user", "content": user_input})
 
         print("\nAssistant:", end=" ", flush=True)
         gpt_stream_responses(conversation, update_callback, finished_callback)
+
+        # user_input -> gpt-text-embedding model to generate a embedding
+        # for that embedding, find vector simiarlity in the database and fetch the actual contents as a part of system input.
+if __name__ == "__main__":
+    run_chatbotgui()
 
 '''
 1. 爬蟲軟件會從iras爬最新的文章
