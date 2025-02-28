@@ -183,7 +183,8 @@ def get_scraped_data_with_pages(depth):
     # Here is to parse the string list format into actual list format.
 
     print(scraped_data)
-    print(type(scraped_data))
+    upload_to_mongo(scraped_data, "FSPDatabase",
+                    "untaggeddatabase")
 
     for item in scraped_data:
         text_data = item.get("text", "")
@@ -208,16 +209,13 @@ def get_scraped_data_with_pages(depth):
         item["text"] = flattened_text
 
     # Print the modified JSON
-
+    print(scraped_data)
     return scraped_data
+
 
     # upload_to_mongo(scraped_data, "TaggedDatabase", "TaggedCollection")
     # print("Data uploaded successfully.")
 
 
 if __name__ == "__main__":
-
-    with open('testext.txt', 'r') as file:
-        text1 = file.read()
-
-    print(json.dumps(text1,indent=4))
+    get_scraped_data_with_pages(1)
