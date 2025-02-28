@@ -2,7 +2,7 @@
 selenium
 openai
 crawl4ai
-
+numpy
 pandas
 openpyxl
 networkx
