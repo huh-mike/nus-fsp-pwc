@@ -1,19 +1,25 @@
 from ChatBotGUI import run_chatbotgui
-from DataScraper import get_datascraped_depth
-from DataTagger import create_embeddings_and_get_relevant_tags
-from db import upload_to_mongo
+
+
+def main():
+    """
+    Main entry point for the Tax Assistant application.
+    Ensures all necessary files are available before running the chatbot.
+    """
+    try:
+        # Import necessary modules (will raise ImportError if any are missing)
+        import pandas as pd
+        import numpy as np
+        from openai import OpenAI
+        
+        # Run the chatbot GUI
+        run_chatbotgui()
+    except ImportError as e:
+        print(f"Error: Missing required package. {e}")
+        print("Please install required packages using: pip install -r requirements.txt")
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 if __name__ == "__main__":
-    # Scrape Data from the first x pages:
-    raw_article_dataset = get_datascraped_depth(1)
-
-    # Tag each of the Data entries using vector similarity
-    tagged_article_dataset = create_embeddings_and_get_relevant_tags(raw_article_dataset)
-
-
-    upload_to_mongo(tagged_article_dataset)
-
-    print(tagged_article_dataset)
-
-    run_chatbotgui()
+    main()

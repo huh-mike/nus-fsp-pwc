@@ -1,5 +1,5 @@
 from GPTServices import gpt_stream_responses, gpt_generate_embedding, ChatHistory
-from DataBasePipline import fetch_relevant_documents
+from RAGServices import fetch_relevant_documents
 import dotenv
 
 dotenv.load_dotenv()
@@ -16,11 +16,18 @@ def finished_callback(full_response):
 # External
 
 def run_chatbotgui():
-    print("Chat Streaming Test. Type 'exit' to stop.")
+    print("Tax Assistant Chatbot. Type 'exit' to stop.")
+    print("This chatbot uses RAG to find relevant tax information for your queries.")
 
     # Initialise Conversation
     chat_history = ChatHistory()
-    conversation = []
+    # Add system message to guide the assistant's behavior
+    chat_history.history = [
+        {"role": "system", "content": "You are a tax assistant AI that specializes in Singapore tax information. "
+                                     "Provide concise, accurate answers based on the reference information provided. "
+                                     "If you don't have specific information to answer a question, acknowledge this "
+                                     "limitation and provide general information if possible."}
+    ]
 
     while True:
         user_input = input("\nYou: ")
@@ -28,20 +35,25 @@ def run_chatbotgui():
             print("Exiting chat test.")
             break
 
-        user_embedding = gpt_generate_embedding(user_input)
-        print(f"Your Question's embedding is generated: {user_embedding}")
-
-        # system_rag_context = fetch_relevant_documents(user_embedding)
-        # print(f"Your reference for this question: {system_rag_context}")
-
-        conversation.append({"role": "system", "content": "Your reference for this question: {system_rag_context}"})
+        # Get relevant documents using RAG
+        print("Searching for relevant tax information...")
+        system_rag_context = fetch_relevant_documents(user_input)
+        
+        # Create a temporary conversation for this exchange
+        conversation = chat_history.get_conversation().copy()
+        # Add the RAG context as a system message
+        conversation.append({"role": "system", "content": f"Your reference for this question: {system_rag_context}"})
+        # Add the user's question
         conversation.append({"role": "user", "content": user_input})
 
-        print("\nAssistant:", end=" ", flush=True)
-        gpt_stream_responses(conversation, update_callback, finished_callback,chat_history)
+        # Add the user message to the history
+        chat_history.add_user_message(user_input)
 
-        # user_input -> gpt-text-embedding model to generate a embedding
-        # for that embedding, find vector simiarlity in the database and fetch the actual contents as a part of system input.
+        print("\nAssistant:", end=" ", flush=True)
+        # Use the temporary conversation that includes the RAG context
+        gpt_stream_responses(conversation, update_callback, finished_callback, chat_history)
+
+
 if __name__ == "__main__":
     run_chatbotgui()
 

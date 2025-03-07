@@ -17,6 +17,7 @@ from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
 from PdfProcessor import download_pdf as dp
 from PdfProcessor import extract_text_from_pdf as ep
+from CsvProcessor import save_scraped_data_to_csv as savecsv
 
 from GPTServices import gpt_generate_single_response
 from db import upload_to_mongo  # Import upload function
@@ -218,4 +219,6 @@ def get_scraped_data_with_pages(depth):
 
 
 if __name__ == "__main__":
-    get_scraped_data_with_pages(1)
+    data = get_scraped_data_with_pages(1)
+
+    savecsv(data)
